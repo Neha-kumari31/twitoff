@@ -1,6 +1,6 @@
 # twitoff
-# pipenv install flask flask-sqlalchemy flask-migrate python-dotenv requests tweepy basilica scikit-learn jinja2 gunicorn python-dotenv python-decouple
-
+``` pipenv install flask flask-sqlalchemy flask-migrate python-dotenv requests tweepy basilica scikit-learn jinja2 gunicorn python-dotenv python-decouple
+```
 WEB APPLICATION 
 
 # inclass-web-app-2
