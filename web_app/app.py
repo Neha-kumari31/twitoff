@@ -8,7 +8,7 @@ from web_app.models import DB, User, Tweet #,migrate
 # from web_app.routes import my_routes
 # #from web_app.more_routes import more_routes
 from web_app.twitter import add_or_update_user
-
+from .predict import predict_user
 #load_dotenv()
 
 #DATABASE_URL = os.getenv("DATABASE_URL", default="OOPS")
@@ -34,29 +34,8 @@ def create_app():
         return render_template('homepage.html', title='Home Page',users=users)
 
         
-    @app.route("/reset")
-    def reset():
-        DB.drop_all()
-        DB.create_all()
-        return render_template('homepage.html', title='DB Reset', users=[]) 
 
-   #adding user using post request needs form
-#    # Adding user using get request with parameter     
-#     @app.route("/user", methods=["POST",])
-#     @app.route('/user/<name>',methods=['GET'])
-#     def user(name=None, message =''):
-#         # todo: create a new user
-#         #breakpoint()
-#         name = name or request.values['user_name']
-#         try:
-#             if request.method == 'POST':
-#                 add_or_update_user(name)
-#                 message = 'User{} successfully added'.format(name)
-#             tweets = User.query.filter(User.name == name).one().tweets    
-#         except Exception as e:
-#             message = 'Error adding {}: {}'.format(name,e)
-#             tweets = []
-#         return render_template('user.html', title=name, tweets=tweets, message=message) 
+   
     @app.route('/user', methods=['POST'])
     @app.route('/user/<name>', methods=['GET'])
 
@@ -71,6 +50,29 @@ def create_app():
             message = "Error adding or fetching {}: {}".format(name, e)
             tweets = []
         return render_template('user.html', title=name, tweets=tweets,
-                                message=message)       
+                                message=message)   
+
+
+    @app.route('/compare', methods=['POST'])
+    def compare(message=''):
+        user1, user2 = sorted([request.values['user1'],
+                               request.values['user2']])
+        if user1 == user2:
+            message = 'Cannot compare a user to themselves!'
+        else:
+            prediction = predict_user(user1, user2, request.values['tweet_text']) 
+            message = ' "{}" is more likely to be said by {} than {}'.format(
+                request.values['tweet_text'], user1 if prediction else user2,
+                user2 if prediction else user1)
+            
+        return render_template('prediction.html', title='Prediction', message=message)
+    
+    @app.route("/reset")
+    def reset():
+        DB.drop_all()
+        DB.create_all()
+        return render_template('homepage.html', title='DB Reset', users=[]) 
+
+
 
     return app
